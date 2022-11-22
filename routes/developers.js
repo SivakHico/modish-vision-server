@@ -1,5 +1,5 @@
-import Product from '../models/product.js'
-import Category from '../models/category.js'
+import Developer from '../models/developer.js'
+import City from '../models/city.js'
 import express from 'express'
 import mongoose from 'mongoose'
 import multer from 'multer'
@@ -32,30 +32,30 @@ const uploadOptions = multer({ storage: storage })
 
 router.get(`/`, async (req, res) => {
     let filter = {}
-    if (req.query.categories) {
-        filter = { category: req.query.categories.split(',') }
+    if (req.query.city) {
+        filter = { city: req.query.cities.split(',') }
     }
 
-    const productList = await Product.find(filter).populate('category')
+    const developerList = await Developer.find(filter).populate('city')
 
-    if (!productList) {
+    if (!developerList) {
         res.status(500).json({ success: false })
     }
-    res.send({ productList })
+    res.send({ developerList })
 })
 
 router.get(`/:id`, async (req, res) => {
-    const product = await Product.findById(req.params.id).populate('category')
+    const developer = await Developer.findById(req.params.id).populate('city')
 
-    if (!product) {
+    if (!developer) {
         res.status(500).json({ success: false })
     }
-    res.send({ product })
+    res.send({ developer })
 })
 
 router.post(`/`, uploadOptions.single('image'), async (req, res) => {
-    const category = await Category.findById(req.body.category)
-    if (!category) return res.status(400).send('Invalid Category')
+    const city = await Category.findById(req.body.city)
+    if (!city) return res.status(400).send('Invalid City')
 
     const file = req.file
     if (!file) return res.status(400).send('No image in the request')
@@ -63,25 +63,23 @@ router.post(`/`, uploadOptions.single('image'), async (req, res) => {
     const fileName = file.filename
     const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`
 
-    let product = new Product({
-        name: req.body.name,
-        description: req.body.description,
-        richDescription: req.body.richDescription,
+    let developer = new Developer({
+        salutation: req.body.salutation,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
         image: `${basePath}${fileName}`,
-        brand: req.body.brand,
-        price: req.body.price,
-        category: req.body.category,
-        countInStock: req.body.countInStock,
-        rating: req.body.rating,
-        numReviews: req.body.numReviews,
-        isFeatured: req.body.isFeatured
+        birthday: req.body.birthday,
+        specialist: req.body.specialist,
+        experience: req.body.experience,
+        postcode: req.body.postcode,
+        city: req.body.city
     })
 
-    product = await product.save()
+    developer = await developer.save()
 
-    if (!product) return res.status(500).send('The product cannot be created')
+    if (!developer) return res.status(500).send('The Developer cannot be created')
 
-    res.send({ product })
+    res.send({ developer })
 })
 
 router.put('/:id', uploadOptions.single('image'), async (req, res) => {

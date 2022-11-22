@@ -1,12 +1,11 @@
 import express from 'express'
 import morgan from 'morgan'
 import mongoose from 'mongoose'
-import categoriesRoutes from './routes/categories.js'
-import ordersRoutes from './routes/orders.js'
-import productsRoutes from './routes/products.js'
+import 'dotenv/config'
+import citiesRoutes from './routes/cities.js'
+import developersRoutes from './routes/developers.js'
 import usersRoutes from './routes/users.js'
 import cors from 'cors'
-import 'dotenv/config'
 import authJwt from './helpers/jwt.js'
 import errorHandler from './helpers/error-handler.js'
 const PORT = process.env.PORT || 3000
@@ -22,16 +21,15 @@ app.use(morgan('tiny'))
 app.use(authJwt())
 app.use(errorHandler)
 
-app.use(`${api}/categories`, categoriesRoutes)
-app.use(`${api}/orders`, ordersRoutes)
-app.use(`${api}/products`, productsRoutes)
+app.use(`${api}/cities`, citiesRoutes)
+app.use(`${api}/developers`, developersRoutes)
 app.use(`${api}/users`, usersRoutes)
 
 mongoose
     .connect(connectDB, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        dbName: 'hico-shop'
+        dbName: 'linkthem'
     })
     .then(() => {
         console.log('DataBase Connection is Ready...')
