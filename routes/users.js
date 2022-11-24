@@ -38,7 +38,8 @@ router.put('/:id', async (req, res) => {
             email: req.body.email,
             password: newPassword,
             type: req.body.type,
-            status: req.body.status
+            status: req.body.status,
+            isAdmin: req.body.isAdmin
         },
         { new: true }
     )
@@ -49,13 +50,14 @@ router.put('/:id', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-    const user = await User.findOne({ email: req.body.email })
+    const { email, password } = req.body
+    const user = await User.findOne({ email: email })
 
     if (!user) {
         return res.status(400).send('The user not found')
     }
 
-    if (user && bcrypt.compareSync(req.body.password, user.password)) {
+    if (user && bcrypt.compareSync(password, user.password)) {
         const token = jwt.sign(
             {
                 userId: user.id,
@@ -65,7 +67,7 @@ router.post('/login', async (req, res) => {
             { expiresIn: '1d' }
         )
 
-        res.status(200).send({ user: user.email, token: token })
+        res.status(200).send({ user: user, token: token })
     } else {
         res.status(400).send('password is wrong!')
     }
