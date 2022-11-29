@@ -14,14 +14,47 @@ router.get(`/`, async (req, res) => {
     res.send({ userList })
 })
 
-router.get('/:id', async (req, res) => {
-    const user = await User.findById(req.params.id).select('-password')
-
-    if (!user) {
-        res.status(500).json({ message: 'The user with the given ID was not found.' })
+router.get(`/check-token`, async (req, res) => {
+    // 1. does the user have a authorization token?
+    // (check req.token)
+    // 2. does the token match a user in the database?
+    // (check req.token.id with User.findById(req.token.id))
+    // 3. if so, send back a success message with the user's info and user's userProfile info
+    // 3.b ) if not, send back a null message
+    if (req.token) {
+        try {
+            const user = await User.findById(req.token.userId)
+            if (user) {
+                // now check their profile in Developer or Company models
+                if (user.type === 'developer') {
+                    const developer = await Developer.find({ user: user._id })
+                    res.send({ user, profile: developer, message: 'welcome back developer!' })
+                } else if (user.type === 'company') {
+                    const company = await Company.find({
+                        user: user._id
+                    })
+                    res.send({ user, profile: company, message: 'welcome back company!' })
+                }
+                res.send({ user })
+            } else {
+                res.send({ user: null, message: 'token invalid, user not found' })
+            }
+        } catch (error) {
+            res.send({ user: null, message: 'something went wrong, please try again later' })
+        }
+    } else {
+        res.send({ user: null, message: 'user not logged in' })
     }
-    res.status(200).send({ user })
 })
+
+// router.get('/:id', async (req, res) => {
+//     const user = await User.findById(req.params.id).select('-password')
+
+//     if (!user) {
+//         res.status(500).json({ message: 'The user with the given ID was not found.' })
+//     }
+//     res.status(200).send({ user })
+// })
 
 router.put('/:id', async (req, res) => {
     const userExist = await User.findById(req.params.id)
@@ -54,14 +87,13 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email: email })
 
     if (!user) {
-        // return res.status(400).send('The user not found')
         console.log('The user not found')
     }
 
     if (user && bcrypt.compareSync(password, user.password)) {
         const token = jwt.sign(
             {
-                userId: user.id,
+                userId: user._id,
                 isAdmin: user.isAdmin
             },
             secret,
@@ -89,7 +121,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ success: false, message: 'the user cannot be created!' })
     const token = jwt.sign(
         {
-            userId: user.id,
+            userId: user._id,
             isAdmin: user.isAdmin
         },
         secret,

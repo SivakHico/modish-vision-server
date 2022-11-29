@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-
 const developerSchema = mongoose.Schema({
     salutation: {
         type: String,
@@ -7,6 +6,11 @@ const developerSchema = mongoose.Schema({
     },
     firstname: {
         type: String,
+        required: true
+    },
+    user_id: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
         required: true
     },
     lastname: {
@@ -21,15 +25,27 @@ const developerSchema = mongoose.Schema({
         type: String,
         default: ''
     },
+    email: {
+        type: String,
+        required: false
+    },
     specialist: {
         type: String,
         required: true
     },
-    experience: {
+    phonenumber: {
         type: Number,
-        default: 0
+        required: true
     },
-    postcode: {
+    linkedin: {
+        type: String,
+        required: false
+    },
+    github: {
+        type: String,
+        required: false
+    },
+    experience: {
         type: Number,
         default: 0
     },

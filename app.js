@@ -12,14 +12,32 @@ const PORT = process.env.PORT || 3000
 const api = process.env.API_URL
 const connectDB = process.env.CONNECT_DB
 const app = express()
+import jwt from 'jsonwebtoken'
 
 app.use(cors())
 app.options('*', cors())
 
 app.use(express.json())
 app.use(morgan('tiny'))
-app.use(authJwt())
+// app.use(authJwt())
 app.use(errorHandler)
+
+// does the user have a authorization token? if so, verify it
+app.use((req, res, next) => {
+    console.log('req.headers.authorization', req.headers.authorization)
+    if (req.headers.authorization) {
+        const token = req.headers.authorization.split(' ')[1]
+        if (token) {
+            const decoded = jwt.verify(token, process.env.secret)
+            req.token = decoded
+            next()
+        } else {
+            next()
+        }
+    } else {
+        next()
+    }
+})
 
 app.use(`${api}/cities`, citiesRoutes)
 app.use(`${api}/developers`, developersRoutes)
