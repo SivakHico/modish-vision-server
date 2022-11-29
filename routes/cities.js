@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
 
     if (!city) return res.status(400).send('the City cannot be created!')
 
-    res.send(city)
+    res.send({ city })
 })
 
 router.put('/:id', async (req, res) => {

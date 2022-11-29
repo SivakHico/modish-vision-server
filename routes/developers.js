@@ -31,12 +31,12 @@ const storage = multer.diskStorage({
 const uploadOptions = multer({ storage: storage })
 
 router.get(`/`, async (req, res) => {
-    let filter = {}
-    if (req.query.city) {
-        filter = { city: req.query.cities.split(',') }
-    }
+    //let filter = {}
+    //if (req.query.city) {
+    //    filter = { city: req.query.cities.split(',') }
+    //}
 
-    const developerList = await Developer.find(filter).populate('city')
+    const developerList = await Developer.find()
 
     if (!developerList) {
         res.status(500).json({ success: false })
@@ -54,20 +54,22 @@ router.get(`/:id`, async (req, res) => {
 })
 
 router.post(`/`, uploadOptions.single('image'), async (req, res) => {
-    const city = await Category.findById(req.body.city)
+    const city = await City.findById(req.body.city)
     if (!city) return res.status(400).send('Invalid City')
 
-    const file = req.file
-    if (!file) return res.status(400).send('No image in the request')
+    // const file = req.file
+    // if (!file) return res.status(400).send('No image in the request')
 
-    const fileName = file.filename
-    const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`
+    // const fileName = file.filename
+    // const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`
+
+    // image: `${basePath}${fileName}`,
 
     let developer = new Developer({
         salutation: req.body.salutation,
         firstname: req.body.firstname,
         lastname: req.body.lastname,
-        image: `${basePath}${fileName}`,
+        image: req.body.image,
         birthday: req.body.birthday,
         specialist: req.body.specialist,
         experience: req.body.experience,
