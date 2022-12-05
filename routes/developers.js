@@ -1,5 +1,6 @@
 import Developer from '../models/developer.js'
 import City from '../models/city.js'
+import User from '../models/user.js'
 import express from 'express'
 import mongoose from 'mongoose'
 import multer from 'multer'
@@ -54,8 +55,13 @@ router.get(`/:id`, async (req, res) => {
 })
 
 router.post(`/`, uploadOptions.single('image'), async (req, res) => {
-    const city = await City.findById(req.body.city)
+    console.log(req.body)
+    const city = await City.findOne({ name: req.body.city })
+    console.log(city)
     if (!city) return res.status(400).send('Invalid City')
+
+    const userDoc = await User.findById(req.body.user_id)
+    if (!userDoc) return res.status(400).send('Invalid User ID')
     // const file = req.file
     // if (!file) return res.status(400).send('No image in the request')
     // const fileName = file.filename
@@ -63,8 +69,9 @@ router.post(`/`, uploadOptions.single('image'), async (req, res) => {
     // image: `${basePath}${fileName}`,
 
     let developer = new Developer({
+        user_id: req.body.user_id,
         email: req.body.email,
-        salutation: req.body.salutation,
+        salutation: req.body.gender,
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         image: req.body.image,
@@ -74,7 +81,7 @@ router.post(`/`, uploadOptions.single('image'), async (req, res) => {
         github: req.body.github,
         specialist: req.body.specialist,
         experience: req.body.experience,
-        city: req.body.city
+        city: city._id
     })
 
     developer = await developer.save()

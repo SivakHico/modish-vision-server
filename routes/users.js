@@ -3,6 +3,8 @@ import express from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 const router = express.Router()
+import Developer from '../models/developer.js'
+// import Company from '../models/company.js'
 
 const secret = process.env.secret
 
@@ -30,10 +32,10 @@ router.get(`/check-token`, async (req, res) => {
                     const developer = await Developer.find({ user: user._id })
                     res.send({ user, profile: developer, message: 'welcome back developer!' })
                 } else if (user.type === 'company') {
-                    const company = await Company.find({
-                        user: user._id
-                    })
-                    res.send({ user, profile: company, message: 'welcome back company!' })
+                    // const company = await Company.find({
+                    //     user: user._id
+                    // })
+                    // res.send({ user, profile: company, message: 'welcome back company!' })
                 }
                 res.send({ user })
             } else {
@@ -56,32 +58,6 @@ router.get(`/check-token`, async (req, res) => {
 //     res.status(200).send({ user })
 // })
 
-router.put('/:id', async (req, res) => {
-    const userExist = await User.findById(req.params.id)
-    let newPassword
-    if (req.body.password) {
-        newPassword = bcrypt.hashSync(req.body.password, 10)
-    } else {
-        newPassword = userExist.password
-    }
-
-    const user = await User.findByIdAndUpdate(
-        req.params.id,
-        {
-            email: req.body.email,
-            password: newPassword,
-            type: req.body.type,
-            status: req.body.status,
-            isAdmin: req.body.isAdmin
-        },
-        { new: true }
-    )
-
-    if (!user) return res.status(400).send('the user cannot be created!')
-
-    res.send({ user })
-})
-
 router.post('/login', async (req, res) => {
     const { email, password } = req.body
     const user = await User.findOne({ email: email })
@@ -99,6 +75,17 @@ router.post('/login', async (req, res) => {
             secret,
             { expiresIn: '1d' }
         )
+
+        // ( to verify the token, use jwt.verify(token, secret) )
+
+        // jwt.verify(token, secret, (err, decoded) => {
+        //     if (err) {
+        //         console.log(err)
+        //     }
+        //     if (decoded) {
+        //         console.log(decoded)
+        //     }
+        // })
 
         res.status(200).send({ user: user, token: token })
     } else {

@@ -28,9 +28,14 @@ app.use((req, res, next) => {
     if (req.headers.authorization) {
         const token = req.headers.authorization.split(' ')[1]
         if (token) {
-            const decoded = jwt.verify(token, process.env.secret)
-            req.token = decoded
-            next()
+            try {
+                const decoded = jwt.verify(token, process.env.secret)
+                req.token = decoded
+                next()
+            } catch (error) {
+                console.log('error >>>>>>>>>>', error)
+                next()
+            }
         } else {
             next()
         }

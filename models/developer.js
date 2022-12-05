@@ -1,16 +1,17 @@
 import mongoose from 'mongoose'
+
 const developerSchema = mongoose.Schema({
     salutation: {
         type: String,
         required: true
     },
-    firstname: {
-        type: String,
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true
     },
-    user_id: {
-        type: mongoose.Types.ObjectId,
-        ref: 'User',
+    firstname: {
+        type: String,
         required: true
     },
     lastname: {
@@ -27,7 +28,7 @@ const developerSchema = mongoose.Schema({
     },
     email: {
         type: String,
-        required: false
+        required: true
     },
     specialist: {
         type: String,
