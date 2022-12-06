@@ -50,8 +50,13 @@ app.use(`${api}/developers`, developersRoutes)
 app.use(`${api}/users`, usersRoutes)
 
 const storeItems = new Map([
-    [1, { priceInCents: 10000, name: 'Learn React Today' }],
-    [2, { priceInCents: 20000, name: 'Learn CSS Today' }]
+    [
+        1,
+        {
+            priceInCents: 2000,
+            name: 'For a small one-off fee, you can then contact the Developers of your choice directly.'
+        }
+    ]
 ])
 
 app.post('/create-checkout-session', async (req, res) => {
@@ -63,7 +68,7 @@ app.post('/create-checkout-session', async (req, res) => {
                 const storeItem = storeItems.get(item.id)
                 return {
                     price_data: {
-                        currency: 'usd',
+                        currency: 'eur',
                         product_data: {
                             name: storeItem.name
                         },
@@ -72,7 +77,7 @@ app.post('/create-checkout-session', async (req, res) => {
                     quantity: item.quantity
                 }
             }),
-            success_url: `${process.env.CLIENT_URL}/`,
+            success_url: `${process.env.CLIENT_URL}/success`,
             cancel_url: `${process.env.CLIENT_URL}/`
         })
         res.json({ url: session.url })
