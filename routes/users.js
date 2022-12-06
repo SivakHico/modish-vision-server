@@ -61,7 +61,7 @@ router.get(`/check-token`, async (req, res) => {
 router.post('/login', async (req, res) => {
     const { email, password } = req.body
     const user = await User.findOne({ email: email })
-
+    console.log('a', user)
     if (!user) {
         console.log('The user not found')
     }
@@ -75,26 +75,16 @@ router.post('/login', async (req, res) => {
             secret,
             { expiresIn: '1d' }
         )
-
-        // ( to verify the token, use jwt.verify(token, secret) )
-
-        // jwt.verify(token, secret, (err, decoded) => {
-        //     if (err) {
-        //         console.log(err)
-        //     }
-        //     if (decoded) {
-        //         console.log(decoded)
-        //     }
-        // })
-
+        console.log('b')
         res.status(200).send({ user: user, token: token })
     } else {
+        console.log('c')
         res.status(400).send('password is wrong!')
     }
 })
 
 router.post('/register', async (req, res) => {
-    console.log(req.body)
+    console.log('register', req.body)
     let user = new User({
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10),
