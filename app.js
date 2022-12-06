@@ -13,16 +13,17 @@ const api = process.env.API_URL
 const connectDB = process.env.CONNECT_DB
 const app = express()
 import jwt from 'jsonwebtoken'
+import Stripe from 'stripe'
+const secrt = process.env.STRIPE_PRIVATE_KEY
+const stripe = new Stripe(secrt)
 
 app.use(cors())
 app.options('*', cors())
-
 app.use(express.json())
 app.use(morgan('tiny'))
 // app.use(authJwt())
 app.use(errorHandler)
 
-// does the user have a authorization token? if so, verify it
 app.use((req, res, next) => {
     console.log('req.headers.authorization', req.headers.authorization)
     if (req.headers.authorization) {
@@ -47,6 +48,38 @@ app.use((req, res, next) => {
 app.use(`${api}/cities`, citiesRoutes)
 app.use(`${api}/developers`, developersRoutes)
 app.use(`${api}/users`, usersRoutes)
+
+const storeItems = new Map([
+    [1, { priceInCents: 10000, name: 'Learn React Today' }],
+    [2, { priceInCents: 20000, name: 'Learn CSS Today' }]
+])
+
+app.post('/create-checkout-session', async (req, res) => {
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: req.body.items.map((item) => {
+                const storeItem = storeItems.get(item.id)
+                return {
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: storeItem.name
+                        },
+                        unit_amount: storeItem.priceInCents
+                    },
+                    quantity: item.quantity
+                }
+            }),
+            success_url: `${process.env.CLIENT_URL}/`,
+            cancel_url: `${process.env.CLIENT_URL}/`
+        })
+        res.json({ url: session.url })
+    } catch (e) {
+        res.status(500).json({ error: e.message })
+    }
+})
 
 mongoose
     .connect(connectDB, {
